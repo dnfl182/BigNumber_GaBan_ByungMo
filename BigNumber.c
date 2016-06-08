@@ -63,6 +63,43 @@ int main(void){
 	}
 	
 }
+int add (int a, int b){	//둘다 양수 기준 
+	
+	int newNum = getNew();
+	for(int i = 1 ; i < CIPHER_MAX; i++)
+		Num[newNum][i] = Num[a][i] + Num[b][i];
+
+	for(int i = CIPHER_MAX - 1; i >= 1; i--)
+		if(Num[newNum][i] >= 10){
+			if(i == 1)
+				sendError(ERROR_NUMBER_OVERFLOW);	//정수가 50자리 보다 크다 
+			Num[newNum][i] -= 10;
+			Num[newNum][i - 1]++;
+		}
+	
+	return newNum; 
+} 
+
+int subtract(int a,int b){	//둘다 양수 기준
+	int newNum = getNew();
+	
+	if(compare(a,b) == -1){
+		Num[newNum][0] = 1;	// - 부호
+		int t = a;	//Swap
+		a = b;
+		b = t;
+	}
+	for(int i = 1; i < CIPHER_MAX; i++)
+		Num[newNum][i] = Num[a][i] - Num[b][i];
+	
+	for(int i =  CIPHER_MAX - 1; i >= 1; i--)
+		if(Num[newNum][i] < 0){
+			Num[newNum][i] += 10;
+			Num[newNum][i - 1]--;
+		}
+	return newNum;
+}
+
 void clear(){
 	printf("지워졋다 나중에 구현\n"); 
 }
