@@ -62,6 +62,43 @@ int main(void){
 	}
 	
 }
+int add (int a, int b){	//µÑ´Ù ¾ç¼ö ±âÁØ 
+	
+	int newNum = getNew();
+	for(int i = 1 ; i < CIPHER_MAX; i++)
+		Num[newNum][i] = Num[a][i] + Num[b][i];
+
+	for(int i = CIPHER_MAX - 1; i >= 1; i--)
+		if(Num[newNum][i] >= 10){
+			if(i == 1)
+				sendError(ERROR_NUMBER_OVERFLOW);	//Á¤¼ö°¡ 50ÀÚ¸® º¸´Ù Å©´Ù 
+			Num[newNum][i] -= 10;
+			Num[newNum][i - 1]++;
+		}
+	
+	return newNum; 
+} 
+
+int subtract(int a,int b){	//µÑ´Ù ¾ç¼ö ±âÁØ
+	int newNum = getNew();
+	
+	if(compare(a,b) == -1){
+		Num[newNum][0] = 1;	// - ºÎÈ£
+		int t = a;	//Swap
+		a = b;
+		b = t;
+	}
+	for(int i = 1; i < CIPHER_MAX; i++)
+		Num[newNum][i] = Num[a][i] - Num[b][i];
+	
+	for(int i =  CIPHER_MAX - 1; i >= 1; i--)
+		if(Num[newNum][i] < 0){
+			Num[newNum][i] += 10;
+			Num[newNum][i - 1]--;
+		}
+	return newNum;
+}
+
 void clear(){
 	printf("ì§€ì›Œë³‘ ë‚˜ì¤‘ì— êµ¬í˜„\n"); 
 }
