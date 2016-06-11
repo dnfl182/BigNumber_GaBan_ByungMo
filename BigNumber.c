@@ -1,49 +1,48 @@
 /*
-	±âº» º£ÀÌ½º »õ·Î¿î ¹öÁ¯
+	ê¸°ë³¸ ë² ì´ìŠ¤ ìƒˆë¡œìš´ ë²„ì ¼
 	*/	
 #include <stdio.h>
 #include <string.h>
-#include <conio.h>
-#define CIPHER_MAX 60	// ¼ıÀÚ¹è¿­ÀÇ ÃÑ±æÀÌ 0 : ºÎÈ£ 1 ~ 50 : Á¤¼ö 51 ~ 59 ¼Ò¼ö 
-#define DECIMAL 9	//¼Ò¼ö ºÎºĞ 
-#define VAR_MAX 10	//º¯¼ö
-#define TVAR_MAX 100 //ÀÓ½Ãº¯¼ö
-#define SVAR_MAX 3	//Æ¯º°ÇÑ º¯¼ö
+#define CIPHER_MAX 60	// ìˆ«ìë°°ì—´ì˜ ì´ê¸¸ì´ 0 : ë¶€í˜¸ 1 ~ 50 : ì •ìˆ˜ 51 ~ 59 ì†Œìˆ˜ 
+#define DECIMAL 9	//ì†Œìˆ˜ ë¶€ë¶„ 
+#define VAR_MAX 10	//ë³€ìˆ˜
+#define TVAR_MAX 100 //ì„ì‹œë³€ìˆ˜
+#define SVAR_MAX 3	//íŠ¹ë³„í•œ ë³€ìˆ˜
 #define ONE	VAR_MAX + TVAR_MAX + 1
 #define TEN VAR_MAX + TVAR_MAX + 2
 #define ZERO VAR_MAX + TVAR_MAX + 3
 #define TOTAL_VAR (VAR_MAX+TVAR_MAX+SVAR_MAX)
 #define COMMAND_LENGTH 20
-char Num[TOTAL_VAR][CIPHER_MAX];	//0 ~ TVAR_MAX - 1 : (ÀÓ½Ãº¯¼ö) ±âÅ¸»ı·«
-char signal[VAR_MAX];	//º¯¼ö ±âÈ£ 
-char command[COMMAND_LENGTH];	//¸í·É 
-void init();	//½ÃÀÛ ÇÒ¶§ ÇÊ¿äÇÑ°Å 
+char Num[TOTAL_VAR][CIPHER_MAX];	//0 ~ TVAR_MAX - 1 : (ì„ì‹œë³€ìˆ˜) ê¸°íƒ€ìƒëµ
+char signal[VAR_MAX];	//ë³€ìˆ˜ ê¸°í˜¸ 
+char command[COMMAND_LENGTH];	//ëª…ë ¹ 
+void init();	//ì‹œì‘ í• ë•Œ í•„ìš”í•œê±° 
 
-void sendError(int a);	//¿À·ù Ã³¸®
-int input(int a);	// Å×½ºÆ®¿ëÀ¸·Î »ç¿ë(¼ıÀÚ¹Ş±â) 
-int getNew();	//»õ·Î¿î ÀÓ½Ã º¯¼ö °¡Á®¿À±â 
-int getVarNew(); // »õ·Î¿î º¯¼ö °¡Á®¿À±â 
-void show(int a);	//Å×½ºÆ®¿ë (¼ıÀÚ º¸¿©ÁÖ±â) 
-int add(int a,int b);//´õÇÏ±â 
-int minus(int a);//´ÜÇ×(¸¶ÀÌ³Ê½º) 
-int subtract(int a, int b);//•û±â 
-int multiply(int a, int b);//°öÇÏ±â 
-int divide(int a, int b);//³ª´©±â 
-int rest(int a, int b);//³ª¸ÓÁö 
-int compare(int a, int b);//ºñ±³(ÇÑÁÖÇü ¿äÃ») 
-void remover(int a);//ÀÓ½Ãº¯¼ö »èÁ¦ 
-void transition(int a,int b);	//a¿¡ b¸¦ ´ëÀÔ(ÇÑÁÖÇü ¿äÃ») 
-void clear();	//È­¸é ºñ¿ì±â 
-void save();	//º¯¼ö ÀúÀå 
-void load();	//º¯¼ö ºÒ·¯¿À±â 
-void interpreter();	//º¹ÇÕ ¿¬»êÀÚ(¹Ì¿Ï) 
-void showVAR();	//º¯¼ö º¸¿©ÁÖ±â 
-void findVarFromSignal(char c);	// ¹®ÀÚ·Î º¯¼ö Ã£±â 
+void sendError(int a);	//ì˜¤ë¥˜ ì²˜ë¦¬
+int input(int a);	// í…ŒìŠ¤íŠ¸ìš©ìœ¼ë¡œ ì‚¬ìš©(ìˆ«ìë°›ê¸°) 
+int getNew();	//ìƒˆë¡œìš´ ì„ì‹œ ë³€ìˆ˜ ê°€ì ¸ì˜¤ê¸° 
+int getVarNew(); // ìƒˆë¡œìš´ ë³€ìˆ˜ ê°€ì ¸ì˜¤ê¸° 
+void show(int a);	//í…ŒìŠ¤íŠ¸ìš© (ìˆ«ì ë³´ì—¬ì£¼ê¸°) 
+int add(int a,int b);//ë”í•˜ê¸° 
+int minus(int a);//ë‹¨í•­(ë§ˆì´ë„ˆìŠ¤) 
+int subtract(int a, int b);//Â•å…® 
+int multiply(int a, int b);//ê³±í•˜ê¸° 
+int divide(int a, int b);//ë‚˜ëˆ„ê¸° 
+int rest(int a, int b);//ë‚˜ë¨¸ì§€ 
+int compare(int a, int b);//ë¹„êµ(í•œì£¼í˜• ìš”ì²­) 
+void remover(int a);//ì„ì‹œë³€ìˆ˜ ì‚­ì œ 
+void transition(int a,int b);	//aì— bë¥¼ ëŒ€ì…(í•œì£¼í˜• ìš”ì²­) 
+void clear();	//í™”ë©´ ë¹„ìš°ê¸° 
+void save();	//ë³€ìˆ˜ ì €ì¥ 
+void load();	//ë³€ìˆ˜ ë¶ˆëŸ¬ì˜¤ê¸° 
+void interpreter();	//ë³µí•© ì—°ì‚°ì(ë¯¸ì™„) 
+void showVAR();	//ë³€ìˆ˜ ë³´ì—¬ì£¼ê¸° 
+void findVarFromSignal(char c);	// ë¬¸ìë¡œ ë³€ìˆ˜ ì°¾ê¸° 
 int main(void){
 	init();
 
 	while(1){
-		printf("ÀÔ·ÂÇÏ¼¼¿ä : "); 
+		printf("ì…ë ¥í•˜ì„¸ìš” : "); 
 		gets(command);
 		if(strcmp(command,"end") == 0)
 			break;
@@ -57,23 +56,23 @@ int main(void){
 			showVAR();
 		else
 			interpreter();
-		//Å×½ºÆ®
+		//í…ŒìŠ¤íŠ¸
 		for(int i = 0 ;i < COMMAND_LENGTH; i++)
 			command[i] = 0;
 	}
 	
 }
 void clear(){
-	printf("Áö¿ö º´Ù ³ªÁß¿¡ ±¸Çö\n"); 
+	printf("ì§€ì›Œë³‘ ë‚˜ì¤‘ì— êµ¬í˜„\n"); 
 }
 void init(){
-	for(int i = 0 ; i < VAR_MAX + TVAR_MAX; i++)	// ºÎÈ£ ºÎºĞÀÌ -1ÀÌ¸é ¾ø´Â°Í Ãë±Ş 
+	for(int i = 0 ; i < VAR_MAX + TVAR_MAX; i++)	// ë¶€í˜¸ ë¶€ë¶„ì´ -1ì´ë©´ ì—†ëŠ”ê²ƒ ì·¨ê¸‰ 
 		Num[i][0] = -1;
 		
 	for(int i = 0; i < VAR_MAX; i++)
 		signal[i] = 0;
 	for(int i = 0 ; i< TOTAL_VAR; i++)
-		for(int j = 1; j < CIPHER_MAX; j++)	// 0 À¸·Î ÀüºÎ ´ëÀÔ 
+		for(int j = 1; j < CIPHER_MAX; j++)	// 0 ìœ¼ë¡œ ì „ë¶€ ëŒ€ì… 
 			Num[i][j] = 0;
 			
 	Num[TEN][CIPHER_MAX - DECIMAL - 2] = 1;	//10
@@ -83,41 +82,41 @@ void init(){
 int findVarFromSignal(char c){
 	int var = -1;
 	for(int i = 0; i < VAR_MAX; i++)
-		if(signal[i] == c || signal[i] + 32 == c || signal[i] - 32 == c)	//´ë¼Ò¹®ÀÚ ±¸º° X ±ÍÂú¾Æ¼­ ÀÌ·¸°Ô 
+		if(signal[i] == c || signal[i] + 32 == c || signal[i] - 32 == c)	//ëŒ€ì†Œë¬¸ì êµ¬ë³„ X ê·€ì°®ì•„ì„œ ì´ë ‡ê²Œ 
 			var = TVAR_MAX + i;
 	return var;
 }
 int getNew(){
 	int newNum = -1;
-	for(int i = 0 ; i < TVAR_MAX; i++)	//ºñ¾îÀÖ´Â ÀÓ½Ãº¯¼ö Ã£±â 
+	for(int i = 0 ; i < TVAR_MAX; i++)	//ë¹„ì–´ìˆëŠ” ì„ì‹œë³€ìˆ˜ ì°¾ê¸° 
 		 if(Num[i][0] == -1){
 		 	newNum = i;
 		 	break;
 		 }
-	if(newNum == -1)	//¿¡·¯ ¹ß»ı 
+	if(newNum == -1)	//ì—ëŸ¬ ë°œìƒ 
 		sendError(ERROR_TVAR_OVERFLOW);
 		
-	for(int i = 0; i < CIPHER_MAX; i++)	// ÃÊ±âÈ­ 
+	for(int i = 0; i < CIPHER_MAX; i++)	// ì´ˆê¸°í™” 
 		Num[newNum][i] = 0;
 	return newNum;
 }
 
 int getVarNew(){
 	int newNum = -1;
-	for(int i = TVAR_MAX ; i < TVAR_MAX + VAR_MAX; i++)	//ºñ¾îÀÖ´Â ÀÓ½Ãº¯¼ö Ã£±â 
+	for(int i = TVAR_MAX ; i < TVAR_MAX + VAR_MAX; i++)	//ë¹„ì–´ìˆëŠ” ì„ì‹œë³€ìˆ˜ ì°¾ê¸° 
 		 if(Num[i][0] == -1){
 		 	newNum = i;
 		 	break;
 		 }
-	if(newNum == -1)	//¿¡·¯ ¹ß»ı 
+	if(newNum == -1)	//ì—ëŸ¬ ë°œìƒ 
 		sendError(ERROR_VAR_OVERFLOW);
 		
-	for(int i = 0; i < CIPHER_MAX; i++)	// ÃÊ±âÈ­ 
+	for(int i = 0; i < CIPHER_MAX; i++)	// ì´ˆê¸°í™” 
 		Num[newNum][i] = 0;
 	return newNum;
 }
 
-//Å×½ºÆ®¿ë 
+//í…ŒìŠ¤íŠ¸ìš© 
 void show(int a){
 	printf("%c",Num[a][0] ? '-' : '+');
 	for(int i = 1; i <= CIPHER_MAX - DECIMAL - 1; i++)
@@ -127,10 +126,10 @@ void show(int a){
 	printf("%d",Num[a][i]);
 	printf("\n");
 }
-///Å×½ºÆ®¿ë 
+///í…ŒìŠ¤íŠ¸ìš© 
 int input(){ 
 	char in[100];
-	int toPoint = -1;	//Á¤¼öºÎ ¼ıÀÚ °¹¼ö
+	int toPoint = -1;	//ì •ìˆ˜ë¶€ ìˆ«ì ê°¯ìˆ˜
 	int newNum = getNew();
 	int isMinus = 0;
 	gets(in);
@@ -140,18 +139,18 @@ int input(){
 		isMinus = 1;
 	}
 	
-	while(in[++toPoint]!='.' && in[toPoint] != 0);	// Á¤¼öºÎºĞ °¹¼ö Ã£±â (¸¶ÀÌ³Ê½º ºÎÈ£ Æ÷ÇÔ) 
+	while(in[++toPoint]!='.' && in[toPoint] != 0);	// ì •ìˆ˜ë¶€ë¶„ ê°¯ìˆ˜ ì°¾ê¸° (ë§ˆì´ë„ˆìŠ¤ ë¶€í˜¸ í¬í•¨) 
 	
 	
 	for(int i = CIPHER_MAX - DECIMAL - toPoint +  isMinus , j = isMinus; j < toPoint; i++ , j++)
-		Num[newNum][i] = in[j] -'0';	//¹®ÀÚ¿­ÀÌ¹Ç·Î 
+		Num[newNum][i] = in[j] -'0';	//ë¬¸ìì—´ì´ë¯€ë¡œ 
 	for(int i = CIPHER_MAX - DECIMAL , j = toPoint + 1; j < strlen(in); i++ , j++){
 		Num[newNum][i] = in[j] -'0';
 	}
 	return newNum;
 }
 
-int compare(int a,int b){	// 1 : (a °¡ Å©´Ù) 0  : (°°´Ù) -1 : (b°¡ Å©´Ù)
+int compare(int a,int b){	// 1 : (a ê°€ í¬ë‹¤) 0  : (ê°™ë‹¤) -1 : (bê°€ í¬ë‹¤)
 	
 	for(int i = 1; i < CIPHER_MAX; i++)
 	{
