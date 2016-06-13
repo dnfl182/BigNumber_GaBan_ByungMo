@@ -98,7 +98,84 @@ int subtract(int a,int b){	//µÑ´Ù ¾ç¼ö ±âÁØ
 		}
 	return newNum;
 }
+int multiply(int a,int b){	//°öÇÏ±â ¹Ý¿Ã¸² ¾ø´Â ¹öÁ¯ 
+	int temp[CIPHER_MAX  * 2 + 100];	//±×³É Å©°Ô ¸¸µë 
+	int tempLen = CIPHER_MAX * 2 + 100; 
+	int newNum = getNew();	//»õ·Î¿î °ª ¾ò¾î¿À±â 
+	Num[newNum][0] = (Num[a][0] + Num[b][0]) % 2;
+	
+	for(int i = 0 ; i  < tempLen; i++)
+		temp[i] = 0;
+	
+	for(int i = CIPHER_MAX - 1; i >= 0; i--)
+		for(int j = CIPHER_MAX - 1; j >= 0; j--)
+			temp[tempLen - (CIPHER_MAX - i - 1) - (CIPHER_MAX - j - 1) - 1] += Num[a][i] * Num[b][j];	//ÀÏÀÏÀÌ ÇÏ³ªÇÏ³ª °öÇØ¼­´õÇÏ°í 
+		
+		
+	for(int i = tempLen - 1; i >= 1; i--)	//¿Ã¸®±â 
+		if(temp[i] >= 10 ){
+			temp[i - 1] += temp[i] / 10;
+			temp[i] %= 10;
+		}
+	
+	if(temp[tempLen - DECIMAL] > 5){	//¹Ý¿Ã¸² 
+		temp[tempLen - DECIMAL - 1] += 1;
+		for(int i = tempLen - 1; i >= 1; i--)
+		if(temp[i] >= 10 ){
+			temp[i - 1] += temp[i] / 10;
+			temp[i] %= 10;
+		}
+	}///¹Ý¿Ã¸² ¼Ò½º 
+	int start = tempLen - DECIMAL- 1;	//Á¤´ä ³Ö±â 
+	for(int i = start , j = CIPHER_MAX - 1; j >= 1; j--,i--)
+		Num[newNum][j] = temp[i];
+	return newNum;
 
+}
+int MultiTen(int a){	// * 10
+	for(int i = 1; i <= CIPHER_MAX - 2; i++)
+		Num[a][i] = Num[a][i + 1];
+	Num[a][CIPHAR_MAX - 1] = 0;
+}
+int divide(int a, int b){
+	int newNum = getNew();
+	int size = 0;
+	int temp[CIPHER_MAX  * 2 + 100];	//ÀÌ°Íµµ Å©°Ô 
+	int tempLen = CIPHER_MAX * 2 + 100; 
+	int ua = getNew();
+	int ub = getNew();
+	transition(ua,a);
+	transition(ub,b);
+	Num[newNum][0] = (Num[a][0] + Num[a][0]) % 2;
+	int tempn = getNew();
+	transition(tempn,ub);
+	MultiTen(tempn);
+	while(compare(a,tempn) >= 0){	// °Ô»ê ºü¸£°ÔÇÏ±âÀ§ÇØ¼­  
+		++size;
+		MultiTen(ub);
+		MultiTen(tempn);
+	}
+		remover(tempn);	//tempn »èÁ¦ (ÀÌÁ¦ ¾µÇÊ¿ä¾ø¾î¼­) 
+	while(size != -10){		//¸Ç³¡±îÁö °¡¸é Á¾·á 
+		int cal = 0;
+		while(compare(ua,ub) >= 0 && compare(ua,ZERO) != 0){
+			int ta;
+			ta = ua;
+			ua = subtract(ua,ub);
+			remover(ta);
+			cal++;
+		}
+		MultiTen(ua);
+		temp[tempLen - 1 - DECIMAL - size] = cal;
+		size--;
+	}
+	for(int i = CIPHER_MAX - 1, j = 1 ; i >= 0; i-- ,j++)
+		Num[newNum][i] = temp[tempLen - j];
+	 
+	remover(ua);
+	remover(ub);
+	return newNum;
+}
 void clear(){
 	printf("ì§€ì›Œë³‘ ë‚˜ì¤‘ì— êµ¬í˜„\n"); 
 }
