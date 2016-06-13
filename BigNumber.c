@@ -78,7 +78,7 @@ int add (int a, int b){	//둘다 양수 기준
 	
 	return newNum; 
 } 
-
+//test
 int subtract(int a,int b){	//둘다 양수 기준
 	int newNum = getNew();
 	
