@@ -284,41 +284,6 @@ void remover(int a){
 		Num[a][0] = -1;
 }
 
-void load(){
-	FILE *fp;
-	char varChar;
-	char in[CIPHER_MAX];
-	
-	if((fp = fopen("save","r")) == NULL){
-		sendError(ERROR_FILE);
-		return;
-	}
-	while(fscanf(fp,"%c %s\n",&varChar,in) != EOF){
-		int varNum = findVarFromSignal(varChar);
-		if(varNum == -1){
-			varNum = getVarNew();
-			signal[varNum - TVAR_MAX] = varChar;
-		}
-		for(int i = 0 ; i < CIPHER_MAX; i++)
-			Num[varNum][i] = in[i] - '0';
-	}
-	fclose(fp);
-}
-void save(){
-	FILE *fp;
-	if((fp = fopen("save","w")) == NULL){
-		sendError(ERROR_FILE);
-		return;
-	}
-	for(int i = 0; i < VAR_MAX; i++)
-		if(Num[TVAR_MAX + i][0] != -1){
-			fprintf(fp,"%c ",signal[i]);
-			for(int j = 0 ; j< CIPHER_MAX; j++)
-				fprintf(fp,"%d",Num[TVAR_MAX + i][j]);
-			fprintf(fp,"\n");
-		}
-	fclose(fp);
-}
 void showVAR(){
 	for(int i = 0; i < VAR_MAX ; i++)
 		if(Num[TVAR_MAX + i][0] != -1){
