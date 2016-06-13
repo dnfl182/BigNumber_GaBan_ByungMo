@@ -61,6 +61,206 @@ int main(void){
 			command[i] = 0;
 	}
 	
+}void sendError(int a){
+	switch(a){
+		case ERROR_TVAR_OVERFLOW : 
+		printf("임시 변수가 다 꽉찻다");
+		break;
+		case ERROR_NUMBER_OVERFLOW:
+		printf("최대 자리수를 벗어남");	
+		break;
+		case ERROR_FILE:
+		printf("파일 관련 오류");
+		break;
+		case ERROR_VAR_OVERFLOW:
+		printf("변수 가 다 꽉찿다");
+		break;
+		case ERROR_CAL:
+		printf("계산 오류");
+		break; 
+		case ERROR_UNKNOWN:
+		printf("존재하지 않는 변수");
+		break; 
+	}
+	printf("\n");
+}
+int isAlpha(char c){
+	if(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z'))
+		return 1;
+	return 0;
+}
+int isNumber(char c){
+	if(c >= '0' && c <= '9' || c == '.')
+		return 1;
+	return 0;
+}
+int findVarFromSignal(char c){
+	int var = -1;
+	for(int i = 0; i < VAR_MAX; i++)
+		if(signal[i] == c || signal[i] + 32 == c || signal[i] - 32 == c)	//대소문자 구별 X 귀찮아서 이렇게 
+			var = TVAR_MAX + i;
+	return var;
+}
+void interpreter(){
+	int header = -1;
+	int condition = 0;	//0 : 단순 연산 1 : 대입연산
+	int target = -1;	// 대입할경우 대상 
+	
+	for(int i = 0 ; i < COMMAND_LENGTH; i++)	//문제 쪼개기 
+		if(command[i] == '=')
+			condition = 1;
+			
+	if(condition == 1){	//오류 해결및 대입할 대상을 정함 
+			while(command[++header] != '='){
+				if(command[header] == ' ')
+					continue;
+				if(isAlpha(command[header])){
+					if(target != -1){
+						sendError(ERROR_CAL);
+						return;
+					}
+					target = command[header];
+				}
+				else{
+						sendError(ERROR_CAL);
+						return;
+				}	
+			}
+	}
+	int cal[1000] = {0};
+	int calHeader = -1;
+	int state = 0;	// 0 숫자를 받을 차례 1 부호를 받을 차례 2  마이너스 특수 
+	while(command[++header] != 0){
+		if(command[header] == ' ')
+			continue;
+		
+		if(state == 0 || state == 2){
+			char in[CIPHER_MAX] = {0};
+			int inHeader = -1;
+			if(command[header] == '-'){		//마이너스 특수 처리 
+				if(state == 0){
+					state = 2;
+					continue;
+				}
+				else{
+					sendError(ERROR_CAL);
+					return;
+				}
+			}
+			else if(isAlpha(command[header])){	//알파벳일경우
+				int varNum;
+				if((varNum = findVarFromSignal(command[header])) == -1){	//없는 변수일경우
+				 	sendError(ERROR_UNKNOWN);
+				 	return;
+				 }
+				cal[++calHeader] = varNum;
+			}
+			else if(!isNumber(command[header])){	//숫자가 아닐경우
+				sendError(ERROR_CAL);
+				return;
+			}
+			else{
+				in[++inHeader] = command[header];
+				while(isNumber(command[header + 1])){	//숫자 계산 
+					++header;
+					in[++inHeader] = command[header];
+				}
+				///////문자 숫자화 
+				int toPoint = -1;	//정수부 숫자 갯수
+				int newNum = getNew();
+				int isMinus = 0;
+				if(in[0] == '-'){
+					Num[newNum][0] = 1;
+					isMinus = 1;
+				}
+				while(in[++toPoint]!='.' && in[toPoint] != 0);	// 정수부분 갯수 찾기 (마이너스 부호 포함) 
+				for(int i = CIPHER_MAX - DECIMAL - toPoint +  isMinus , j = isMinus; j < toPoint; i++ , j++)
+					Num[newNum][i] = in[j] -'0';	//문자열이므로 
+				for(int i = CIPHER_MAX - DECIMAL , j = toPoint + 1; j < strlen(in); i++ , j++)
+					Num[newNum][i] = in[j] -'0';
+				///////////
+				if(state == 2)
+					minus(newNum);
+				cal[++calHeader] = newNum;
+			}
+			state = 1;
+		}
+		else{
+			int can = 0;
+			char whiteList[5] = {'+','-','*','/','%'};
+			for(int i = 0 ; i < 5; i++)
+				if(command[header] == whiteList[i])
+					can = 1;
+			if(can == 0){	//정해진 기호가 아닐경우
+				printf("%c",command[header]);
+				sendError(ERROR_CAL);
+				return;
+			}
+			cal[++calHeader] = command[header] + 1000;	// + 1000 이유 숫자랑 구분하기 위해서 
+			state = 0;
+		}	
+	}
+	if(state != 1){
+		sendError(ERROR_CAL);
+		return;
+	}
+	for(int i = 0 ; i <= calHeader;){
+		int newNum;
+		if(cal[i] == '*' + 1000)
+			newNum = multiply(cal[i-1],cal[i+1]);
+		else if(cal[i] == '/' + 1000)
+			newNum = divide(cal[i-1],cal[i+1]);
+		else if(cal[i] == '%' + 1000)
+			newNum = rest(cal[i-1],cal[i+1]);
+		else{
+			i++;
+			continue;
+		}
+		remover(cal[i-1]);
+		remover(cal[i+1]);
+		cal[i - 1] = newNum;
+		calHeader -= 2;
+		for(int j = i; j <= calHeader; j++)
+			cal[j] = cal[j + 2];
+		
+	}
+	//빼기와 더하기만 남았다. 
+	while(calHeader != 0){
+		int newNum;
+		//특별한 더하기 그리고 빼기
+		if(cal[1] == '-' + 1000)
+		 minus(cal[2]);
+			 
+		if(Num[cal[0]][0] == 0 && Num[cal[2]][0] == 0)	// 둘다 양수 일경우 
+			newNum = add(cal[0],cal[2]); 
+		else if(Num[cal[0]][0] == 1 && Num[cal[2]][0] == 1)	//둘다 음수 
+			newNum = minus(add(cal[0],cal[2]));
+		else if(Num[cal[0]][0] == 0 && Num[cal[2]][0] == 1)	//한수가 양수 
+			newNum = subtract(cal[0],cal[2]);
+		else
+			newNum = subtract(cal[2],cal[1]);
+		remover(cal[0]);
+		remover(cal[2]);
+		cal[0] = newNum;
+		calHeader -= 2;
+		for(int j = 1; j <= calHeader; j++)
+			cal[j] = cal[j + 2];
+		
+	}
+	if(target != -1){
+		int temp;
+		if((temp = findVarFromSignal(target)) != -1)
+			target = temp;
+		else{
+			temp = getVarNew();
+			signal[temp - TVAR_MAX] = target;
+			target = temp;
+		}
+		transition(target,cal[0]);
+	}
+	printf(" = ");
+	show(cal[0]);
+	remover(cal[0]);
 }
 int add (int a, int b){	//µÑ´Ù ¾ç¼ö ±âÁØ 
 	
@@ -315,30 +515,6 @@ void show(int a){
 	printf("%d",Num[a][i]);
 	printf("\n");
 }
-///í…ŒìŠ¤íŠ¸ìš© 
-int input(){ 
-	char in[100];
-	int toPoint = -1;	//ì •ìˆ˜ë¶€ ìˆ«ìž ê°¯ìˆ˜
-	int newNum = getNew();
-	int isMinus = 0;
-	gets(in);
-	
-	if(in[0] == '-'){
-		Num[newNum][0] = 1;
-		isMinus = 1;
-	}
-	
-	while(in[++toPoint]!='.' && in[toPoint] != 0);	// ì •ìˆ˜ë¶€ë¶„ ê°¯ìˆ˜ ì°¾ê¸° (ë§ˆì´ë„ˆìŠ¤ ë¶€í˜¸ í¬í•¨) 
-	
-	
-	for(int i = CIPHER_MAX - DECIMAL - toPoint +  isMinus , j = isMinus; j < toPoint; i++ , j++)
-		Num[newNum][i] = in[j] -'0';	//ë¬¸ìžì—´ì´ë¯€ë¡œ 
-	for(int i = CIPHER_MAX - DECIMAL , j = toPoint + 1; j < strlen(in); i++ , j++){
-		Num[newNum][i] = in[j] -'0';
-	}
-	return newNum;
-}
-
 int compare(int a,int b){	// 1 : (a ê°€ í¬ë‹¤) 0  : (ê°™ë‹¤) -1 : (bê°€ í¬ë‹¤)
 	
 	for(int i = 1; i < CIPHER_MAX; i++)
