@@ -19,6 +19,12 @@ char command[COMMAND_LENGTH];	//ëª…ë ¹
 void init();	//ì‹œìž‘ í• ë•Œ í•„ìš”í•œê±° 
 
 void sendError(int a);	//ì˜¤ë¥˜ ì²˜ë¦¬
+#define ERROR_TVAR_OVERFLOW 1
+#define ERROR_NUMBER_OVERFLOW 2
+#define ERROR_FILE 3
+#define ERROR_VAR_OVERFLOW 4
+#define ERROR_CAL 5
+#define ERROR_UNKNOWN 6
 int input(int a);	// í…ŒìŠ¤íŠ¸ìš©ìœ¼ë¡œ ì‚¬ìš©(ìˆ«ìžë°›ê¸°) 
 int getNew();	//ìƒˆë¡œìš´ ìž„ì‹œ ë³€ìˆ˜ ê°€ì ¸ì˜¤ê¸° 
 int getVarNew(); // ìƒˆë¡œìš´ ë³€ìˆ˜ ê°€ì ¸ì˜¤ê¸° 
