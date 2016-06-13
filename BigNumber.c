@@ -8,52 +8,53 @@
 //	조한주
 //###############################
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #define CIPHER_MAX 60	// 숫자배열의 총길이 0 : 부호 1 ~ 50 : 정수 51 ~ 59 소수 
 #define DECIMAL 9	//소수 부분 
 #define VAR_MAX 10	//변수
 #define TVAR_MAX 100 //임시변수
 #define SVAR_MAX 3	//특별한 변수
-#define ONE	VAR_MAX + TVAR_MAX + 1
-#define TEN VAR_MAX + TVAR_MAX + 2
-#define ZERO VAR_MAX + TVAR_MAX + 3
+#define ONE	VAR_MAX + TVAR_MAX + 0	//1
+#define TEN VAR_MAX + TVAR_MAX + 1	//10
+#define ZERO VAR_MAX + TVAR_MAX + 2	//0
 #define TOTAL_VAR (VAR_MAX+TVAR_MAX+SVAR_MAX)
-#define COMMAND_LENGTH 20
-char Num[TOTAL_VAR][CIPHER_MAX];	//0 ~ TVAR_MAX - 1 : (임시변수) 기타생략
+#define COMMAND_LENGTH 30
+char Num[TOTAL_VAR][CIPHER_MAX];	//0 ~ TVAR_MAX - 1 : 실제 계산에 쓰이는 변수들과 그냥 변수와 특변한 변수 저장하는곳
 char signal[VAR_MAX];	//변수 기호 
 char command[COMMAND_LENGTH];	//명령 
 void init();
 
-void sendError(int a);	//오류 처리
+void sendError(int a);	//오류 처리(상수로 분류)
 #define ERROR_TVAR_OVERFLOW 1
 #define ERROR_NUMBER_OVERFLOW 2
 #define ERROR_FILE 3
 #define ERROR_VAR_OVERFLOW 4
 #define ERROR_CAL 5
 #define ERROR_UNKNOWN 6
-int input(int a);
-int getNew();
-int getVarNew();
-void show(int a);
-int add(int a,int b);
-int minus(int a);
-int subtract(int a, int b);
-int multiply(int a, int b);
-int divide(int a, int b);
-int rest(int a, int b);
-int compare(int a, int b);
-void remover(int a);
+#define ERROR_DIVIDEZERO 7
+int getNew();			//새로운 수 저장소를 가져온다
+int getVarNew();		//새로운 변수 저장소를 가져온다
+void show(int a);		//콤마를 찍어서 수를 보여준다
+int add(int a,int b);	//더하기
+int minus(int a);		//단항 마이너스
+int subtract(int a, int b);	//빼기
+int multiply(int a, int b);	//곱하기
+int divide(int a, int b);	//나누기
+int rest(int a, int b);		//나머지
+int compare(int a, int b);	//비교하기
+void remover(int a);		//수 저장소 삭제
 void transition(int a,int b);	//a에 b를 대입(복사)
-void clear();
-void save();
-void load();
-void interpreter();
-void showVAR();
+void clear();	//화면지우기
+void save();		//저장하기
+void load();		//불러오기
+void interpreter();		//식 해석기
+void showVAR();			//(현재)변수 보여주기
+int findVarFromSignal(char c);	//기호로 변수찾기
 int main(void){
 	init();
 
-	while(1){
-		printf("입력하세요 : "); 
+	while(1){		//명령 루프
 		gets(command);
 		if(strcmp(command,"end") == 0)
 			break;
@@ -63,34 +64,26 @@ int main(void){
 			save();
 		else if(strcmp(command,"load") == 0)
 			load();
-		else if(strcmp(command,"var") == 0)
+		else if(strcmp(command,"VAR") == 0)
 			showVAR();
 		else
 			interpreter();
-		//테스트
 		for(int i = 0 ;i < COMMAND_LENGTH; i++)
-			command[i] = 0;
+			command[i] = 0;	//명령어 지우기
 	}
 	
 }
-int isAlpha(char c){
+int isAlpha(char c){	//c 가 알파벳인가?
 	if(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z'))
 		return 1;
 	return 0;
 }
-int isNumber(char c){
+int isNumber(char c){	// c가 숫자인가?
 	if(c >= '0' && c <= '9' || c == '.')
 		return 1;
 	return 0;
 }
-int findVarFromSignal(char c){
-	int var = -1;
-	for(int i = 0; i < VAR_MAX; i++)
-		if(signal[i] == c || signal[i] + 32 == c || signal[i] - 32 == c)	//대소문자 구별 X 귀찮아서 이렇게 
-			var = TVAR_MAX + i;
-	return var;
-}
-void interpreter(){
+void interpreter(){	//made : 전병모
 	int header = -1;
 	int condition = 0;	//0 : 단순 연산 1 : 대입연산
 	int target = -1;	// 대입할경우 대상 
@@ -117,7 +110,7 @@ void interpreter(){
 			}
 	}
 	int cal[1000] = {0};
-	int calHeader = -1;
+	int calHeader = -1;	//cal을 쓰고 읽는 역할
 	int state = 0;	// 0 숫자를 받을 차례 1 부호를 받을 차례 2  마이너스 특수 
 	while(command[++header] != 0){
 		if(command[header] == ' ')
@@ -176,12 +169,11 @@ void interpreter(){
 		}
 		else{
 			int can = 0;
-			char whiteList[5] = {'+','-','*','/','%'};
+			char whiteList[5] = {'+','-','*','/','%'};//허용 부호들
 			for(int i = 0 ; i < 5; i++)
 				if(command[header] == whiteList[i])
 					can = 1;
 			if(can == 0){	//정해진 기호가 아닐경우
-				printf("%c",command[header]);
 				sendError(ERROR_CAL);
 				return;
 			}
@@ -193,14 +185,25 @@ void interpreter(){
 		sendError(ERROR_CAL);
 		return;
 	}
+	//여기부터 연산시작//곱하기 나누기 나머지 부터
 	for(int i = 0 ; i <= calHeader;){
 		int newNum;
 		if(cal[i] == '*' + 1000)
 			newNum = multiply(cal[i-1],cal[i+1]);
-		else if(cal[i] == '/' + 1000)
+		else if(cal[i] == '/' + 1000){
+			if(compare(cal[i + 1] , ZERO) == 0){
+				sendError(ERROR_DIVIDEZERO);
+				return;
+			}
 			newNum = divide(cal[i-1],cal[i+1]);
-		else if(cal[i] == '%' + 1000)
+		}
+		else if(cal[i] == '%' + 1000){
+			if(compare(cal[i + 1] , ZERO) == 0){
+				sendError(ERROR_DIVIDEZERO);
+				return;
+			}
 			newNum = rest(cal[i-1],cal[i+1]);
+		}
 		else{
 			i++;
 			continue;
@@ -252,10 +255,10 @@ void interpreter(){
 	remover(cal[0]);
 	
 }
-void clear(){
+void clear(){	//made : 김상록
 	system("clear");
 }
-void init(){
+void init(){	//특수변수 설정(0,10,1)
 	for(int i = 0 ; i < VAR_MAX + TVAR_MAX; i++)	// 부호 부분이 -1이면 없는것 취급 
 		Num[i][0] = -1;
 		
@@ -270,10 +273,10 @@ void init(){
 	
 }
 
-void sendError(int a){
+void sendError(int a){	//made : 전병모
 	switch(a){
 		case ERROR_TVAR_OVERFLOW : 
-		printf("임시 변수가 다 꽉찻다");
+		printf("프로그램 내부에서 임시 변수 저장공간이 부족합니다.");
 		break;
 		case ERROR_NUMBER_OVERFLOW:
 		printf("최대 자리수를 벗어남");	
@@ -282,19 +285,22 @@ void sendError(int a){
 		printf("파일 관련 오류");
 		break;
 		case ERROR_VAR_OVERFLOW:
-		printf("변수 가 다 꽉찿다");
+		printf("변수를 더 이상 저장할수 없습니다.");
 		break;
 		case ERROR_CAL:
-		printf("계산 오류");
+		printf("계산 오류.");
 		break; 
 		case ERROR_UNKNOWN:
-		printf("존재하지 않는 변수");
+		printf("undefined");
 		break; 
+		case ERROR_DIVIDEZERO:
+		printf("0으로 나눌수 없습니다.");
+		break;
 	}
 	printf("\n");
 }
 
-int getNew(){
+int getNew(){	//made 전병모
 	int newNum = -1;
 	for(int i = 0 ; i < TVAR_MAX; i++)	//비어있는 임시변수 찾기 
 		 if(Num[i][0] == -1){
@@ -309,21 +315,21 @@ int getNew(){
 	return newNum;
 }
 
-int getVarNew(){
-	int newNum = -1;
+int getVarNew(){	//made 전병모
+	int newNum = -1;	
 	for(int i = TVAR_MAX ; i < TVAR_MAX + VAR_MAX; i++)	//비어있는 임시변수 찾기 
-		 if(Num[i][0] == -1){
+		 if(Num[i][0] == -1){//부호에서 -1이면 없는거 취급
 		 	newNum = i;
 		 	break;
 		 }
-	if(newNum == -1)	//에러 발생 
+	if(newNum == -1)	//에러 발생(남은수자리가 없음) 
 		sendError(ERROR_VAR_OVERFLOW);
 		
 	for(int i = 0; i < CIPHER_MAX; i++)	// 초기화 
 		Num[newNum][i] = 0;
 	return newNum;
 }
-void show(int a){
+void show(int a){	//made 김상록
 	int start = CIPHER_MAX - DECIMAL - 1;
 	int end = CIPHER_MAX - DECIMAL - 1;
 	for(int i = 1; i < CIPHER_MAX - DECIMAL - 1; i++)
@@ -348,30 +354,7 @@ void show(int a){
 	printf("\n"); 
 }
 
-int input(){ 
-	char in[100];
-	int toPoint = -1;	//정수부 숫자 갯수
-	int newNum = getNew();
-	int isMinus = 0;
-	gets(in);
-	
-	if(in[0] == '-'){
-		Num[newNum][0] = 1;
-		isMinus = 1;
-	}
-	
-	while(in[++toPoint]!='.' && in[toPoint] != 0);	// 정수부분 갯수 찾기 (마이너스 부호 포함) 
-	
-	
-	for(int i = CIPHER_MAX - DECIMAL - toPoint +  isMinus , j = isMinus; j < toPoint; i++ , j++)
-		Num[newNum][i] = in[j] -'0';	//문자열이므로 
-	for(int i = CIPHER_MAX - DECIMAL , j = toPoint + 1; j < strlen(in); i++ , j++){
-		Num[newNum][i] = in[j] -'0';
-	}
-	return newNum;
-}
-
-int add (int a, int b){	//둘다 양수 기준 
+int add (int a, int b){	//made 조한주 (a,b)는 양수여야함 
 	
 	int newNum = getNew();
 	for(int i = 1 ; i < CIPHER_MAX; i++)
@@ -387,7 +370,7 @@ int add (int a, int b){	//둘다 양수 기준
 	return newNum; 
 } 
 
-int subtract(int a,int b){	//둘다 양수 기준
+int subtract(int a,int b){	//made 조한주 (a,b)는 양수 (a > b)
 	int newNum = getNew();
 	if(compare(a,b) == -1){
 		Num[newNum][0] = 1;	// - 부호
@@ -406,7 +389,7 @@ int subtract(int a,int b){	//둘다 양수 기준
 	return newNum;
 }
 
-int compare(int a,int b){	// 1 : (a 가 크다) 0  : (같다) -1 : (b가 크다)
+int compare(int a,int b){	//made : 조한주   1 : (a 가 크다) 0  : (같다) -1 : (b가 크다)
 	
 	for(int i = 1; i < CIPHER_MAX; i++)
 	{
@@ -418,7 +401,7 @@ int compare(int a,int b){	// 1 : (a 가 크다) 0  : (같다) -1 : (b가 크다)
 	return 0;
 }
 
-int multiply(int a,int b){	//곱하기 반올림 없는 버젼 
+int multiply(int a,int b){	//made 정명훈
 	int temp[CIPHER_MAX + DECIMAL + 200];
 	int tempLen = CIPHER_MAX + DECIMAL + 200;
 	int newNum = getNew();
@@ -452,16 +435,16 @@ int multiply(int a,int b){	//곱하기 반올림 없는 버젼
 
 }
 
-int minus(int a){
+int minus(int a){	//made :김상록
 	Num[a][0] = (Num[a][0] + 1) % 2;
 	return a;	
 }
 
-void transition(int a, int b){
+void transition(int a, int b){ //made : 조한주
 	for(int i = 0 ; i < CIPHER_MAX; i++)
 		Num[a][i] = Num[b][i];
 }
-void remover(int a){
+void remover(int a){ //made : 전병모
 	if(a < TVAR_MAX)
 		Num[a][0] = -1;
 }
@@ -470,7 +453,7 @@ int MultiTen(int a){	// * 10
 	for(int i = 1; i <= CIPHER_MAX - 2; i++)
 		Num[a][i] = Num[a][i + 1];
 }
-int divide(int a, int b){
+int divide(int a, int b){	//made : 정명훈
 	int newNum = getNew();
 	int size = 0;
 	int temp[200] = {0};
@@ -480,16 +463,15 @@ int divide(int a, int b){
 	transition(ua,a);
 	transition(ub,b);
 	Num[newNum][0] = (Num[a][0] + Num[a][0]) % 2;
-		int tempn = getNew();
-		transition(tempn,ub);
+	int tempn = getNew();
+	transition(tempn,ub);
+	MultiTen(tempn);
+	while(compare(a,tempn) >= 0){
+		++size;
+		MultiTen(ub);
 		MultiTen(tempn);
-		while(compare(a,tempn) >= 0){
-			++size;
-			MultiTen(ub);
-			MultiTen(tempn);
-		}
-		remover(tempn);
-	} 
+	}
+	remover(tempn); 
 	while(size != -10){
 		int cal = 0;
 		while(compare(ua,ub) >= 0 && compare(ua,ZERO) != 0){
@@ -510,7 +492,7 @@ int divide(int a, int b){
 	remover(ub);
 	return newNum;
 }
-int rest(int a, int b){
+int rest(int a, int b){		//made : 김상록
 	int newNum = getNew();
 	int r = divide(a,b);
 	
@@ -522,7 +504,7 @@ int rest(int a, int b){
 	remover(m);
 	return newNum;
 }
-void load(){
+void load(){	//made 김상록
 	FILE *fp;
 	char varChar;
 	char in[CIPHER_MAX];
@@ -542,7 +524,7 @@ void load(){
 	}
 	fclose(fp);
 }
-void save(){
+void save(){		//made 김상록
 	FILE *fp;
 	if((fp = fopen("save","w")) == NULL){
 		sendError(ERROR_FILE);
@@ -557,10 +539,19 @@ void save(){
 		}
 	fclose(fp);
 }
-void showVAR(){
+void showVAR(){	//made 전병모
 	for(int i = 0; i < VAR_MAX ; i++)
 		if(Num[TVAR_MAX + i][0] != -1){
 			printf("%c = ",signal[i]);
 			show(TVAR_MAX + i);
 		}
 }
+
+int findVarFromSignal(char c){	//made 전병모
+	int var = -1;
+	for(int i = 0; i < VAR_MAX; i++)
+		if(signal[i] == c || signal[i] + 32 == c || signal[i] - 32 == c)	//대소문자 구별 X 귀찮아서 이렇게 
+			var = TVAR_MAX + i;
+	return var;
+}
+//기타도움 : 전병모
