@@ -53,8 +53,9 @@ void showVAR();			//(현재)변수 보여주기
 int findVarFromSignal(char c);	//기호로 변수찾기
 int main(void){
 	init();
-	printf("start....")
+	printf("Start.... \n"); 
 	while(1){		//명령 루프
+		printf("(input) ");
 		gets(command);
 		if(strcmp(command,"end") == 0)
 			break;
@@ -250,7 +251,7 @@ void interpreter(){	//made : 전병모
 		}
 		transition(target,cal[0]);
 	}
-	printf(" = ");
+	printf("        = ");
 	show(cal[0]);
 	remover(cal[0]);
 	
@@ -542,7 +543,7 @@ void save(){		//made 김상록
 void showVAR(){	//made 전병모
 	for(int i = 0; i < VAR_MAX ; i++)
 		if(Num[TVAR_MAX + i][0] != -1){
-			printf("%c = ",signal[i]);
+			printf("        %c = ",signal[i]);
 			show(TVAR_MAX + i);
 		}
 }
