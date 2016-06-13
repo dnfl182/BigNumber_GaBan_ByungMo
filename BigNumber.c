@@ -176,8 +176,83 @@ int divide(int a, int b){
 	remover(ub);
 	return newNum;
 }
-void clear(){
-	printf("ì§€ì›Œë³‘ ë‚˜ì¤‘ì— êµ¬í˜„\n"); 
+int rest(int a, int b){
+	int newNum = getNew();
+	int r = divide(a,b);
+	
+	for(int i = CIPHER_MAX - DECIMAL; i < CIPHER_MAX; i++)
+		Num[r][i] = 0;
+	int m = multiply(r,b);
+	newNum = subtract(a,m);
+	remover(r);
+	remover(m);
+	return newNum;
+}
+void load(){
+	FILE *fp;
+	char varChar;
+	char in[CIPHER_MAX];
+	
+	if((fp = fopen("save","r")) == NULL){
+		sendError(ERROR_FILE);
+		return;
+	}
+	while(fscanf(fp,"%c %s\n",&varChar,in) != EOF){
+		int varNum = findVarFromSignal(varChar);
+		if(varNum == -1){
+			varNum = getVarNew();
+			signal[varNum - TVAR_MAX] = varChar;
+		}
+		for(int i = 0 ; i < CIPHER_MAX; i++)
+			Num[varNum][i] = in[i] - '0';
+	}
+	fclose(fp);
+}
+void save(){
+	FILE *fp;
+	if((fp = fopen("save","w")) == NULL){
+		sendError(ERROR_FILE);
+		return;
+	}
+	for(int i = 0; i < VAR_MAX; i++)
+		if(Num[TVAR_MAX + i][0] != -1){
+			fprintf(fp,"%c ",signal[i]);
+			for(int j = 0 ; j< CIPHER_MAX; j++)
+				fprintf(fp,"%d",Num[TVAR_MAX + i][j]);
+			fprintf(fp,"\n");
+		}
+	fclose(fp);
+}
+int minus(int a){
+	Num[a][0] = (Num[a][0] + 1) % 2;
+	return a;	
+}
+void show(int a){
+	int start = CIPHER_MAX - DECIMAL - 1;
+	int end = CIPHER_MAX - DECIMAL - 1;
+	for(int i = 1; i < CIPHER_MAX - DECIMAL - 1; i++)
+		if(Num[a][i] != 0){
+			start = i;
+			break;
+		}
+	for(int i = CIPHER_MAX - 1; i >= CIPHER_MAX - DECIMAL - 1; i--)
+		if(Num[a][i] != 0){
+			end = i;
+			break;
+	}
+	if(Num[a][0] == 1)
+		printf("-");
+	for(int i = start; i <= end; i++){
+		if(i == CIPHER_MAX - DECIMAL)
+			printf(".");
+		else if(i % 3 == 0 && i != start)
+			printf(",");
+		printf("%d",Num[a][i]);
+	}
+	printf("\n"); 
+}
+void clear(){	//삭제후 등록 
+	system("clear");
 }
 void init(){
 	for(int i = 0 ; i < VAR_MAX + TVAR_MAX; i++)	// ë¶€í˜¸ ë¶€ë¶„ì´ -1ì´ë©´ ì—†ëŠ”ê²ƒ ì·¨ê¸‰ 
