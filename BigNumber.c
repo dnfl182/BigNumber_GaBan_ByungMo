@@ -1,9 +1,14 @@
-/*
-	기본 베이스 새로운 버젼
-	*/	
+//########################
+//
+//조장 : 
+//	전병모
+//조원 :
+//	김상록
+//	정명훈
+//	조한주
+//###############################
 #include <stdio.h>
 #include <string.h>
-#include <conio.h>
 #define CIPHER_MAX 60	// 숫자배열의 총길이 0 : 부호 1 ~ 50 : 정수 51 ~ 59 소수 
 #define DECIMAL 9	//소수 부분 
 #define VAR_MAX 10	//변수
@@ -248,7 +253,7 @@ void interpreter(){
 	
 }
 void clear(){
-	printf("지워졋다 나중에 구현\n"); 
+	system("clear");
 }
 void init(){
 	for(int i = 0 ; i < VAR_MAX + TVAR_MAX; i++)	// 부호 부분이 -1이면 없는것 취급 
