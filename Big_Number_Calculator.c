@@ -53,7 +53,7 @@ void showVAR();			//(현재)변수 보여주기
 int findVarFromSignal(char c);	//기호로 변수찾기
 int main(void){
 	init();
-
+	printf("start....")
 	while(1){		//명령 루프
 		gets(command);
 		if(strcmp(command,"end") == 0)
