@@ -485,7 +485,7 @@ int divide(int a, int b){	//made : 정명훈
 		temp[tempLen - 1 - DECIMAL - size] = cal;
 		size--;
 	}
-	for(int i = CIPHER_MAX - 1, j = 1 ; i >= 0; i-- ,j++)
+	for(int i = CIPHER_MAX - 1, j = 1 ; i >= 1; i-- ,j++)
 		Num[newNum][i] = temp[tempLen - j];
 	 
 	remover(ua);
