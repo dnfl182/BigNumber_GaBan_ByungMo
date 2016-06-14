@@ -407,7 +407,6 @@ int multiply(int a,int b){	//made 정명훈
 	int tempLen = CIPHER_MAX + DECIMAL + 200;
 	int newNum = getNew();
 	Num[newNum][0] = (Num[a][0] + Num[b][0]) % 2;
-	
 	for(int i = 0 ; i  < tempLen; i++)
 		temp[i] = 0;
 	
@@ -463,7 +462,7 @@ int divide(int a, int b){	//made : 정명훈
 	int ub = getNew();
 	transition(ua,a);
 	transition(ub,b);
-	Num[newNum][0] = (Num[a][0] + Num[a][0]) % 2;
+	Num[newNum][0] = (Num[a][0] + Num[b][0]) % 2;
 	int tempn = getNew();
 	transition(tempn,ub);
 	MultiTen(tempn);
